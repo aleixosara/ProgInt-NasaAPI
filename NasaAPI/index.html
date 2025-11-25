@@ -1,13 +1,73 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>api</title>
+    <title>Tradutor</title>
+    <link rel="stylesheet" href="src/app.css" />
   </head>
+
   <body>
-    <div id="app"></div>
-    <script type="module" src="/src/main.js"></script>
+    <div id="app">
+      <h1>Tradutor com FunTranslations</h1>
+
+      <div class="card">
+        <textarea id="inputText" placeholder="Digite o texto"></textarea>
+
+        <select id="translationType">
+          <option value="yoda">Yoda</option>
+          <option value="pirate">Pirate</option>
+          <option value="valspeak">Valspeak</option>
+          <option value="shakespeare">Shakespeare</option>
+          <option value="morse">Morse Code</option>
+        </select>
+
+        <button id="translateBtn">Traduzir</button>
+
+        <p id="output"></p>
+      </div>
+    </div>
+
+    <script type="module">
+      const inputText = document.getElementById("inputText");
+      const translationType = document.getElementById("translationType");
+      const output = document.getElementById("output");
+      const btn = document.getElementById("translateBtn");
+
+      async function translate(text, mode) {
+        const url = `https://api.funtranslations.com/translate/${mode}.json`;
+
+        try {
+          const res = await fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: new URLSearchParams({ text }),
+          });
+
+          const data = await res.json();
+
+          if (data.contents) {
+            return data.contents.translated;
+          } else {
+            return data.error?.message || "Erro inesperado.";
+          }
+        } catch (error) {
+          return "Erro ao conectar.";
+        }
+      }
+
+      btn.addEventListener("click", async () => {
+        const txt = inputText.value.trim();
+
+        if (!txt) {
+          output.textContent = "Digite algum texto.";
+          return;
+        }
+
+        output.textContent = "Traduzindo...";
+
+        const translated = await translate(txt, translationType.value);
+        output.textContent = translated;
+      });
+    </script>
   </body>
 </html>
